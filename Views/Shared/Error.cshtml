@@ -1,13 +1,16 @@
 ﻿@model ErrorViewModel
+@* Esta vista recibe un modelo con un identificador de solicitud para diagnostico. *@
 @{
     ViewData["Title"] = "Error";
 }
 
+@* Mensaje generico: no se muestran detalles internos de la excepcion al visitante. *@
 <h1 class="text-danger">Error.</h1>
 <h2 class="text-danger">An error occurred while processing your request.</h2>
 
 @if (Model.ShowRequestId)
 {
+    @* El ID ayuda al equipo tecnico a localizar la solicitud en los registros. *@
     <p>
         <strong>Request ID:</strong> <code>@Model.RequestId</code>
     </p>

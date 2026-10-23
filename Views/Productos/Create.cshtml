@@ -1,3 +1,4 @@
+@* Modelo que enlaza los campos del formulario con las propiedades del producto. *@
 @model MiProyectoMvc.Models.Producto
 
 @{
@@ -9,16 +10,20 @@
     <hr />
     <div class="row">
         <div class="col-md-4">
+            @* asp-action dirige el envio al metodo POST Create del controlador. *@
             <form asp-action="Create">
                 <div class="form-group mb-3">
+                    @* asp-for enlaza etiqueta y campo con Nombre, incluyendo su nombre HTML. *@
                     <label asp-for="Nombre" class="control-label"></label>
                     <input asp-for="Nombre" class="form-control" />
                 </div>
                 <div class="form-group mb-3">
+                    @* El tag helper enlaza el campo numerico con Precio en el modelo. *@
                     <label asp-for="Precio" class="control-label"></label>
                     <input asp-for="Precio" class="form-control" />
                 </div>
                 <div class="form-group">
+                    @* El boton envia el formulario; el enlace Volver llama a Index. *@
                     <input type="submit" value="Crear" class="btn btn-success" />
                     <a asp-action="Index" class="btn btn-secondary">Volver</a>
                 </div>

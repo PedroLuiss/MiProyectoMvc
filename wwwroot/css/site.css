@@ -1,3 +1,4 @@
+/* Tamano base de texto: aumenta en pantallas medianas para mejorar la lectura. */
 html {
   font-size: 14px;
 }
@@ -8,19 +9,23 @@ html {
   }
 }
 
+/* Resalta los controles cuando se navega con teclado o se enfocan. */
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
+/* El minimo de altura facilita posicionar el pie al final de la ventana. */
 html {
   position: relative;
   min-height: 100%;
 }
 
+/* Reserva espacio para que el contenido no quede oculto detras del pie. */
 body {
   margin-bottom: 60px;
 }
 
+/* Alinea los marcadores de posicion de los campos flotantes de Bootstrap. */
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;

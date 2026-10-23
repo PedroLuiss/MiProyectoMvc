@@ -1,12 +1,15 @@
+@* El controlador entrega la coleccion que esta vista presenta como tabla. *@
 @model IEnumerable<MiProyectoMvc.Models.Producto>
 
 @{
+    @* ViewData transmite metadatos que el layout puede usar, como el titulo de la pestana. *@
     ViewData["Title"] = "Lista de Productos";
 }
 
 <div class="container mt-4">
     <h2>Lista de Productos</h2>
     <p>
+        @* asp-action genera el enlace a Create conservando el enrutamiento de MVC. *@
         <a asp-action="Create" class="btn btn-primary">Crear Nuevo Producto</a>
     </p>
     <table class="table table-striped">
@@ -18,10 +21,12 @@
             </tr>
         </thead>
         <tbody>
+            @* Razor combina C# con HTML: se genera una fila por cada producto del modelo. *@
             @foreach (var item in Model) {
                 <tr>
                     <td>@item.Id</td>
                     <td>@item.Nombre</td>
+                    @* N2 muestra dos decimales respetando la cultura configurada en el servidor. *@
                     <td>$@item.Precio.ToString("N2")</td>
                 </tr>
             }

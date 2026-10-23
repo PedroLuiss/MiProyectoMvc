@@ -1,10 +1,13 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+    @* Metadatos basicos para codificacion y adaptacion a pantallas moviles. *@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @* ViewData["Title"] cambia segun la vista que se esta mostrando. *@
     <title>@ViewData["Title"] - MiProyectoMvc</title>
     <script type="importmap"></script>
+    @* Estilos globales de Bootstrap, del sitio y generados por el proyecto. *@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/MiProyectoMvc.styles.css" asp-append-version="true" />
@@ -13,6 +16,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
+                @* Los tag helpers generan rutas MVC sin escribir URLs fijas. *@
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MiProyectoMvc</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -33,15 +37,18 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
+            @* Razor inserta aqui el contenido de la vista solicitada. *@
             @RenderBody()
         </main>
     </div>
 
+    @* Pie comun a todas las paginas. *@
     <footer class="border-top footer text-muted">
         <div class="container">
             &copy; 2026 - MiProyectoMvc - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+    @* Scripts compartidos: jQuery, componentes Bootstrap y codigo propio. *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

@@ -4,16 +4,17 @@ using MiProyectoMvc.Models;
 
 namespace MiProyectoMvc.Data
 {
-	// Heredamos de IdentityDbContext para que gestione automáticamente las tablas de Usuarios, Roles, etc.
-	public class ApplicationDbContext : IdentityDbContext
-	{
+    // IdentityDbContext incluye las entidades necesarias para usuarios, roles y claims.
+    // Esta clase extiende ese modelo para incluir tambien los productos de la aplicacion.
+    public class ApplicationDbContext : IdentityDbContext
+    {
+        // ASP.NET Core inyecta estas opciones, configuradas en Program.cs con SQL Server.
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
 
-
-		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-			: base(options)
-		{
-		}
-
-		public DbSet<Producto> Productos { get; set; }
-	}
+        // DbSet representa la tabla Productos y permite consultarla/modificarla con LINQ.
+        public DbSet<Producto> Productos { get; set; }
+    }
 }

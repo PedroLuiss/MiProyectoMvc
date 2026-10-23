@@ -6,11 +6,14 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MiProyectoMvc.Migrations
 {
     /// <inheritdoc />
+    // Migracion que crea el esquema inicial de Identity y del catalogo de productos.
+    // EF Core ejecuta Up al aplicar la migracion y Down para revertirla.
     public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // Tablas principales de Identity: almacenan usuarios y roles.
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -50,6 +53,7 @@ namespace MiProyectoMvc.Migrations
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
                 });
 
+            // Tabla propia de la aplicacion. SQL Server genera el Id automaticamente.
             migrationBuilder.CreateTable(
                 name: "Productos",
                 columns: table => new
@@ -64,6 +68,7 @@ namespace MiProyectoMvc.Migrations
                     table.PrimaryKey("PK_Productos", x => x.Id);
                 });
 
+            // Tablas dependientes de Identity que guardan claims y asociaciones.
             migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
@@ -170,6 +175,7 @@ namespace MiProyectoMvc.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            // Indices para acelerar busquedas y mantener unicos los nombres normalizados.
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -213,6 +219,7 @@ namespace MiProyectoMvc.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            // Se eliminan primero las tablas dependientes para respetar las claves foraneas.
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
