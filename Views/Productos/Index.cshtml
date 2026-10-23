@@ -3,33 +3,58 @@
 
 @{
     @* ViewData transmite metadatos que el layout puede usar, como el titulo de la pestana. *@
-    ViewData["Title"] = "Lista de Productos";
+    ViewData["Title"] = "Productos";
+    var culture = System.Globalization.CultureInfo.GetCultureInfo("es-MX");
 }
 
-<div class="container mt-4">
-    <h2>Lista de Productos</h2>
-    <p>
-        @* asp-action genera el enlace a Create conservando el enrutamiento de MVC. *@
-        <a asp-action="Create" class="btn btn-primary">Crear Nuevo Producto</a>
-    </p>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Precio</th>
-            </tr>
-        </thead>
-        <tbody>
-            @* Razor combina C# con HTML: se genera una fila por cada producto del modelo. *@
-            @foreach (var item in Model) {
-                <tr>
-                    <td>@item.Id</td>
-                    <td>@item.Nombre</td>
-                    @* N2 muestra dos decimales respetando la cultura configurada en el servidor. *@
-                    <td>$@item.Precio.ToString("N2")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div>
+        <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Productos</h1>
+        <p class="mt-1 text-sm text-slate-500">Catálogo registrado en la base de datos.</p>
+    </div>
+    @* asp-action genera el enlace a Create conservando el enrutamiento de MVC. *@
+    <a asp-action="Create" class="btn-primary">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+        Nuevo producto
+    </a>
 </div>
+
+@if (!Model.Any())
+{
+    <div class="mt-6 rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center">
+        <p class="text-sm font-semibold text-slate-900">Todavía no hay productos</p>
+        <p class="mt-1 text-sm text-slate-500">Crea el primero para verlo en esta tabla.</p>
+        <a asp-action="Create" class="btn-primary mt-5">Crear producto</a>
+    </div>
+}
+else
+{
+    <div class="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+                <thead class="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <tr>
+                        <th scope="col" class="px-4 py-3 sm:px-6">ID</th>
+                        <th scope="col" class="px-4 py-3 sm:px-6">Nombre</th>
+                        <th scope="col" class="px-4 py-3 text-right sm:px-6">Precio</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @* Razor combina C# con HTML: se genera una fila por cada producto del modelo. *@
+                    @foreach (var item in Model)
+                    {
+                        <tr class="transition hover:bg-slate-50">
+                            <td class="whitespace-nowrap px-4 py-3 font-mono text-xs text-slate-500 sm:px-6">#@item.Id</td>
+                            <td class="px-4 py-3 font-medium text-slate-900 sm:px-6">@item.Nombre</td>
+                            <td class="whitespace-nowrap px-4 py-3 text-right font-semibold text-slate-900 sm:px-6">
+                                @item.Precio.ToString("C", culture)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

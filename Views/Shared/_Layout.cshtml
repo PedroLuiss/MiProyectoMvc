@@ -1,56 +1,87 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+    // Devuelve las clases del enlace segun la seccion activa.
+    string NavClass(string controller, string action = "")
+    {
+        var isActive = currentController == controller
+            && (string.IsNullOrEmpty(action) || currentAction == action);
+
+        return isActive
+            ? "block rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white"
+            : "block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900";
+    }
+}
+<!DOCTYPE html>
+<html lang="es" class="h-full">
 <head>
-    @* Metadatos basicos para codificacion y adaptacion a pantallas moviles. *@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     @* ViewData["Title"] cambia segun la vista que se esta mostrando. *@
     <title>@ViewData["Title"] - MiProyectoMvc</title>
-    <script type="importmap"></script>
-    @* Estilos globales de Bootstrap, del sitio y generados por el proyecto. *@
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/MiProyectoMvc.styles.css" asp-append-version="true" />
+    @* app.css lo genera Tailwind a partir de wwwroot/css/input.css. *@
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                @* Los tag helpers generan rutas MVC sin escribir URLs fijas. *@
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MiProyectoMvc</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+<body class="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased">
+    <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/85 backdrop-blur">
+        <nav class="mx-auto flex w-full max-w-6xl items-center justify-between gap-3 px-4 py-3">
+            @* Los tag helpers generan rutas MVC sin escribir URLs fijas. *@
+            <a class="flex items-center gap-2.5" asp-area="" asp-controller="Home" asp-action="Index">
+                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-600 text-sm font-black text-white shadow-sm">M</span>
+                <span class="text-lg font-bold tracking-tight text-slate-900">MiProyecto<span class="text-brand-600">Mvc</span></span>
+            </a>
+
+            <div class="hidden items-center gap-1 sm:flex">
+                <a class="@NavClass("Home", "Index")" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
+                <a class="@NavClass("Productos")" asp-area="" asp-controller="Productos" asp-action="Index">Productos</a>
+                <a class="@NavClass("Home", "Privacy")" asp-area="" asp-controller="Home" asp-action="Privacy">Privacidad</a>
+            </div>
+
+            <div class="hidden sm:block">
+                <partial name="_LoginPartial" />
+            </div>
+
+            @* Sin Bootstrap JS: el menu movil lo controla wwwroot/js/site.js. *@
+            <button type="button" data-menu-toggle aria-controls="mobile-menu" aria-expanded="false"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 sm:hidden">
+                <span class="sr-only">Abrir menú</span>
+                <svg data-menu-icon="open" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+                <svg data-menu-icon="close" class="hidden h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </nav>
+
+        <div id="mobile-menu" class="hidden border-t border-slate-200 bg-white sm:hidden">
+            <div class="mx-auto flex w-full max-w-6xl flex-col gap-1 px-4 py-3">
+                <a class="@NavClass("Home", "Index")" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
+                <a class="@NavClass("Productos")" asp-area="" asp-controller="Productos" asp-action="Index">Productos</a>
+                <a class="@NavClass("Home", "Privacy")" asp-area="" asp-controller="Home" asp-action="Privacy">Privacidad</a>
+                <div class="mt-2 border-t border-slate-200 pt-3">
+                    <partial name="_LoginPartial" />
                 </div>
             </div>
-        </nav>
+        </div>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @* Razor inserta aqui el contenido de la vista solicitada. *@
-            @RenderBody()
-        </main>
-    </div>
+
+    <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:py-10">
+        @* Razor inserta aqui el contenido de la vista solicitada. *@
+        @RenderBody()
+    </main>
 
     @* Pie comun a todas las paginas. *@
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - MiProyectoMvc - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="border-t border-slate-200 bg-white">
+        <div class="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-4 py-5 text-sm text-slate-500 sm:flex-row">
+            <p>&copy; @DateTime.Now.Year MiProyectoMvc</p>
+            <a class="font-medium text-slate-600 transition hover:text-brand-700" asp-area="" asp-controller="Home" asp-action="Privacy">Política de privacidad</a>
         </div>
     </footer>
-    @* Scripts compartidos: jQuery, componentes Bootstrap y codigo propio. *@
+
+    @* jQuery y jQuery Validation siguen siendo necesarios para la validacion en cliente. *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

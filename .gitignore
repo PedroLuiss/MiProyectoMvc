@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+# Tailwind CSS (generado por npm run css:build / css:dev)
+wwwroot/css/app.css
+
 # User-specific files
 *.rsuser
 *.suo

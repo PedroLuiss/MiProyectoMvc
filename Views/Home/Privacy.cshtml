@@ -1,8 +1,27 @@
 ﻿@{
     @* El layout compartido usa este titulo en la pestana del navegador. *@
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Privacidad";
 }
-@* Pagina de ejemplo para publicar la politica de privacidad del sitio. *@
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="mx-auto max-w-3xl">
+    <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Política de privacidad</h1>
+    <p class="mt-2 text-sm text-slate-500">Página de ejemplo del proyecto de práctica.</p>
+
+    <div class="mt-6 space-y-4 rounded-xl border border-slate-200 bg-white p-6 text-sm leading-relaxed text-slate-600 shadow-sm">
+        <p>
+            Este sitio se utiliza únicamente con fines de aprendizaje. Los datos que se
+            registran (cuentas de usuario y productos) se almacenan en una base de datos
+            local configurada por quien ejecuta la aplicación.
+        </p>
+        <p>
+            No se envían datos a servicios externos ni se utilizan para fines comerciales.
+            Si despliegas este proyecto, sustituye este texto por una política adaptada a
+            la normativa que corresponda.
+        </p>
+        <ul class="list-inside list-disc space-y-1">
+            <li>Las contraseñas las gestiona ASP.NET Core Identity; no se guardan en texto plano.</li>
+            <li>La cadena de conexión se define en <code class="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-700">appsettings.json</code>.</li>
+            <li>Puedes eliminar tu cuenta y tus datos desde la sección de administración.</li>
+        </ul>
+    </div>
+</div>

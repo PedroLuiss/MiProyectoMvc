@@ -1,0 +1,14 @@
+{
+  "name": "miproyectomvc",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Utilidades de front-end para MiProyectoMvc",
+  "scripts": {
+    "css:dev": "tailwindcss -i ./wwwroot/css/input.css -o ./wwwroot/css/app.css --watch",
+    "css:build": "tailwindcss -i ./wwwroot/css/input.css -o ./wwwroot/css/app.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "4.3.3",
+    "@tailwindcss/cli": "4.3.3"
+  }
+}

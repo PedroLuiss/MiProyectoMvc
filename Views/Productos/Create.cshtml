@@ -2,32 +2,45 @@
 @model MiProyectoMvc.Models.Producto
 
 @{
-    ViewData["Title"] = "Crear Producto";
+    ViewData["Title"] = "Nuevo producto";
 }
 
-<div class="container mt-4">
-    <h2>Crear Nuevo Producto</h2>
-    <hr />
-    <div class="row">
-        <div class="col-md-4">
-            @* asp-action dirige el envio al metodo POST Create del controlador. *@
-            <form asp-action="Create">
-                <div class="form-group mb-3">
-                    @* asp-for enlaza etiqueta y campo con Nombre, incluyendo su nombre HTML. *@
-                    <label asp-for="Nombre" class="control-label"></label>
-                    <input asp-for="Nombre" class="form-control" />
-                </div>
-                <div class="form-group mb-3">
-                    @* El tag helper enlaza el campo numerico con Precio en el modelo. *@
-                    <label asp-for="Precio" class="control-label"></label>
-                    <input asp-for="Precio" class="form-control" />
-                </div>
-                <div class="form-group">
-                    @* El boton envia el formulario; el enlace Volver llama a Index. *@
-                    <input type="submit" value="Crear" class="btn btn-success" />
-                    <a asp-action="Index" class="btn btn-secondary">Volver</a>
-                </div>
-            </form>
-        </div>
+<div class="mx-auto max-w-xl">
+    <div class="mb-6">
+        <a asp-action="Index" class="text-sm font-medium text-brand-600 transition hover:text-brand-700">← Volver al catálogo</a>
+        <h1 class="mt-2 text-2xl font-bold tracking-tight text-slate-900">Nuevo producto</h1>
+        <p class="mt-1 text-sm text-slate-500">Registra un producto en el catálogo.</p>
     </div>
+
+    @* asp-action dirige el envio al metodo POST Create del controlador. *@
+    <form asp-action="Create" class="space-y-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        @* Errores generales del modelo; las clases se estilan en input.css. *@
+        <div asp-validation-summary="ModelOnly"></div>
+
+        <div>
+            @* asp-for enlaza etiqueta y campo con Nombre, incluyendo su nombre HTML. *@
+            <label asp-for="Nombre" class="mb-1.5 block text-sm font-medium text-slate-700"></label>
+            <input asp-for="Nombre" class="input-field" placeholder="Ej. Café molido 500 g" />
+            <span asp-validation-for="Nombre"></span>
+        </div>
+
+        <div>
+            <label asp-for="Precio" class="mb-1.5 block text-sm font-medium text-slate-700"></label>
+            <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-slate-400">$</span>
+                <input asp-for="Precio" class="input-field pl-7" placeholder="0.00" />
+            </div>
+            <span asp-validation-for="Precio"></span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-5">
+            <button type="submit" class="btn-primary">Guardar producto</button>
+            @* El enlace Volver llama a Index y descarta los cambios del formulario. *@
+            <a asp-action="Index" class="btn-secondary">Cancelar</a>
+        </div>
+    </form>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

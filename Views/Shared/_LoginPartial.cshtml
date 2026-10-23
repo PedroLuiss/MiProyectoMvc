@@ -1,31 +1,28 @@
-@* Identity proporciona los servicios para consultar la sesion y los datos del usuario. *@
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
 
-<ul class="navbar-nav">
-@* La navegacion cambia segun el estado de autenticacion actual. *@
-@if (SignInManager.IsSignedIn(User))
-{
-    <li class="nav-item">
-        @* Si ya inicio sesion, se ofrece acceso a la gestion de su cuenta. *@
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hola @User.Identity?.Name!</a>
-    </li>
-    <li class="nav-item">
-        @* El formulario envia la solicitud de cierre de sesion a Identity. *@
-        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button  type="submit" class="nav-link btn btn-link text-dark">Cerrar Sesión</button>
+@{
+    var userName = User.Identity?.Name ?? "Mi cuenta";
+    var initial = userName.Length > 0 ? userName[..1].ToUpperInvariant() : "?";
+}
+
+<div class="flex flex-wrap items-center gap-2">
+    @* La navegacion cambia segun el estado de autenticacion actual. *@
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <a class="inline-flex max-w-56 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+           asp-area="Identity" asp-page="/Account/Manage/Index" title="Administrar cuenta">
+            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-100 text-xs font-bold text-brand-700">@initial</span>
+            <span class="truncate">@userName</span>
+        </a>
+        <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+            <button type="submit" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-red-600">Cerrar sesión</button>
         </form>
-    </li>
-}
-else
-{
-    @* Para visitantes se muestran enlaces a registro e inicio de sesion. *@
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Registrarse</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Iniciar Sesión</a>
-    </li>
-}
-</ul>
+    }
+    else
+    {
+        <a class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+           asp-area="Identity" asp-page="/Account/Register">Crear cuenta</a>
+        <a class="btn-primary" asp-area="Identity" asp-page="/Account/Login">Iniciar sesión</a>
+    }
+</div>

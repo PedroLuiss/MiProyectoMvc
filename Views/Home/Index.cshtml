@@ -1,10 +1,44 @@
 ﻿@{
     @* Este valor se muestra en el titulo de la pestana desde el layout compartido. *@
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inicio";
 }
 
-@* Contenido principal de la pagina de inicio. *@
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div class="grid gap-10 p-8 sm:p-12 lg:grid-cols-2 lg:items-center">
+        <div>
+            <span class="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-200">
+                Práctica de ASP.NET Core
+            </span>
+            <h1 class="mt-5 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+                Un catálogo de productos con <span class="text-brand-600">MVC y EF Core</span>
+            </h1>
+            <p class="mt-4 max-w-prose text-base leading-relaxed text-slate-600">
+                Proyecto de ejemplo para practicar controladores, Razor, inyección de dependencias,
+                patrón repositorio, Entity Framework Core y ASP.NET Core Identity.
+            </p>
+            <div class="mt-7 flex flex-wrap gap-3">
+                <a class="btn-primary" asp-area="" asp-controller="Productos" asp-action="Index">Ver productos</a>
+                <a class="btn-secondary" asp-area="" asp-controller="Home" asp-action="Privacy">Privacidad</a>
+            </div>
+        </div>
+
+        <div class="grid gap-3 sm:grid-cols-2">
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm font-semibold text-slate-900">Controladores y vistas</p>
+                <p class="mt-1 text-sm text-slate-500">Cada solicitud HTTP termina en una vista Razor.</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm font-semibold text-slate-900">EF Core + SQL Server</p>
+                <p class="mt-1 text-sm text-slate-500">Consultas tipadas y migraciones versionadas.</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm font-semibold text-slate-900">Identity</p>
+                <p class="mt-1 text-sm text-slate-500">Registro, inicio de sesión y rutas protegidas.</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p class="text-sm font-semibold text-slate-900">Tailwind CSS</p>
+                <p class="mt-1 text-sm text-slate-500">Interfaz construida con utilidades y tokens.</p>
+            </div>
+        </div>
+    </div>
+</section>
