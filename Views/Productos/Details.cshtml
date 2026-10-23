@@ -1,0 +1,80 @@
+@model ProductoDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Nombre;
+    var culture = System.Globalization.CultureInfo.GetCultureInfo("es-MX");
+}
+
+<div class="mx-auto max-w-5xl">
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <a asp-action="Index" class="text-sm font-medium text-brand-600 transition hover:text-brand-700">← Volver al catálogo</a>
+        <div class="flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-secondary">Editar</a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn-secondary text-red-600">Eliminar</a>
+        </div>
+    </div>
+
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="grid lg:grid-cols-2">
+            <div class="aspect-[4/3] bg-slate-100 lg:aspect-auto lg:min-h-full">
+                <img src="@(Model.ImagenUrl ?? "/images/producto-placeholder.svg")"
+                     alt="@Model.Nombre"
+                     class="h-full w-full object-cover" />
+            </div>
+
+            <div class="p-6 sm:p-8">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="badge badge-brand">@Model.CategoriaNombre</span>
+                    @if (Model.Activo)
+                    {
+                        <span class="badge badge-success">Activo</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Inactivo</span>
+                    }
+                    @if (Model.Stock == 0)
+                    {
+                        <span class="badge badge-warning">Agotado</span>
+                    }
+                </div>
+
+                <h1 class="mt-4 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">@Model.Nombre</h1>
+                @if (!string.IsNullOrWhiteSpace(Model.Marca))
+                {
+                    <p class="mt-1 text-sm text-slate-500">@Model.Marca</p>
+                }
+
+                <p class="mt-3 text-3xl font-bold text-slate-900">@Model.Precio.ToString("C", culture)</p>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Descripcion))
+                {
+                    <p class="mt-5 text-sm leading-relaxed text-slate-600">@Model.Descripcion</p>
+                }
+                else
+                {
+                    <p class="mt-5 text-sm italic text-slate-400">Sin descripción.</p>
+                }
+
+                <dl class="mt-6 grid grid-cols-2 gap-4 border-t border-slate-100 pt-6 text-sm">
+                    <div>
+                        <dt class="text-slate-500">SKU</dt>
+                        <dd class="mt-1 font-mono font-medium text-slate-900">@Model.Sku</dd>
+                    </div>
+                    <div>
+                        <dt class="text-slate-500">Stock</dt>
+                        <dd class="mt-1 font-medium text-slate-900">@Model.Stock unidades</dd>
+                    </div>
+                    <div>
+                        <dt class="text-slate-500">Categoría</dt>
+                        <dd class="mt-1 font-medium text-slate-900">@Model.CategoriaNombre</dd>
+                    </div>
+                    <div>
+                        <dt class="text-slate-500">Fecha de alta</dt>
+                        <dd class="mt-1 font-medium text-slate-900">@Model.FechaCreacion.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>

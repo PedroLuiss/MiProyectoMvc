@@ -1,0 +1,13 @@
+@model CategoriaFormViewModel
+
+@{
+    ViewData["Title"] = "Editar categoría";
+    ViewData["FormAction"] = "Edit";
+    ViewData["SubmitLabel"] = "Guardar cambios";
+}
+
+<partial name="_Form" model="Model" />
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

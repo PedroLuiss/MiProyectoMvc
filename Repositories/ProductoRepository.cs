@@ -1,45 +1,89 @@
+using Microsoft.EntityFrameworkCore;
 using MiProyectoMvc.Data;
 using MiProyectoMvc.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace MiProyectoMvc.Repositories
 {
     // Implementacion del contrato de productos usando Entity Framework Core.
     public class ProductoRepository : IProductoRepository
     {
-        // El contexto mantiene la conexion y el seguimiento de entidades de EF Core.
         private readonly ApplicationDbContext _context;
 
-        // El contenedor de dependencias proporciona el contexto configurado en Program.cs.
         public ProductoRepository(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // ToListAsync ejecuta la consulta y materializa los resultados en una lista.
-        public async Task<IEnumerable<Producto>> GetAllAsync()
+        public async Task<IReadOnlyList<Producto>> GetAllAsync(int? categoriaId = null, string? buscar = null)
         {
-            return await _context.Productos.ToListAsync();
+            // AsNoTracking acelera lecturas: estas entidades no se van a modificar.
+            var query = _context.Productos
+                .Include(p => p.Categoria)
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (categoriaId is > 0)
+            {
+                query = query.Where(p => p.CategoriaId == categoriaId);
+            }
+
+            if (!string.IsNullOrWhiteSpace(buscar))
+            {
+                var termino = buscar.Trim();
+                query = query.Where(p =>
+                    p.Nombre.Contains(termino) ||
+                    p.Sku.Contains(termino) ||
+                    (p.Marca != null && p.Marca.Contains(termino)));
+            }
+
+            return await query.OrderBy(p => p.Nombre).ToListAsync();
         }
 
-        // FindAsync busca por la clave primaria (Id) y devuelve null si no hay coincidencia.
         public async Task<Producto?> GetByIdAsync(int id)
         {
-            return await _context.Productos.FindAsync(id);
+            // Aqui si se necesita seguimiento porque Edit modifica la entidad.
+            return await _context.Productos
+                .Include(p => p.Categoria)
+                .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        // AddAsync marca la entidad como nueva en el contexto; todavia no la envia a SQL.
-        public async Task AddAsync(Producto producto)
+        public async Task<int> CreateAsync(Producto producto)
         {
-            await _context.Productos.AddAsync(producto);
-        }
-
-        // SaveChangesAsync envia a la base de datos todas las operaciones pendientes.
-        public async Task SaveChangesAsync()
-        {
+            _context.Productos.Add(producto);
             await _context.SaveChangesAsync();
+            return producto.Id;
+        }
+
+        public async Task UpdateAsync(Producto producto)
+        {
+            // Edit trabaja con una entidad ya rastreada; solo se guarda si viene suelta.
+            if (_context.Entry(producto).State == EntityState.Detached)
+            {
+                _context.Attach(producto);
+                _context.Entry(producto).State = EntityState.Modified;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Producto?> DeleteAsync(int id)
+        {
+            var producto = await _context.Productos.FindAsync(id);
+            if (producto is null)
+            {
+                return null;
+            }
+
+            _context.Productos.Remove(producto);
+            await _context.SaveChangesAsync();
+            return producto;
+        }
+
+        public Task<bool> SkuExistsAsync(string sku, int? excludeId = null)
+        {
+            var normalizado = sku.Trim().ToUpperInvariant();
+            return _context.Productos.AnyAsync(p =>
+                p.Sku == normalizado && (excludeId == null || p.Id != excludeId));
         }
     }
 }

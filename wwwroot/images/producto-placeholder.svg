@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" role="img" aria-labelledby="title desc">
+  <title id="title">Sin foto de producto</title>
+  <desc id="desc">Ilustración neutra de una caja de producto.</desc>
+  <rect width="640" height="480" fill="#f1f5f9"/>
+  <circle cx="320" cy="220" r="118" fill="#e2e8f0"/>
+  <path d="m241 187 79-42 79 42v88l-79 42-79-42z" fill="#cbd5e1"/>
+  <path d="m241 187 79 43 79-43m-79 43v87" fill="none" stroke="#94a3b8" stroke-linejoin="round" stroke-width="10"/>
+  <path d="M214 382h212" stroke="#cbd5e1" stroke-linecap="round" stroke-width="12"/>
+</svg>

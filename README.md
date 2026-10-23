@@ -21,15 +21,56 @@ Core, SQL Server, ASP.NET Core Identity y Tailwind CSS. El proyecto apunta a **.
 ## Recorrido de una solicitud
 
 1. El navegador solicita una URL, por ejemplo `/Productos`.
-2. El enrutamiento configurado en `Program.cs` busca la accion correspondiente.
-3. `ProductosController` atiende la solicitud. `[Authorize]` exige iniciar sesion.
-4. El controlador llama a `IProductoRepository`; la implementacion consulta EF Core.
+2. El enrutamiento configurado en `Program.cs` busca la acción correspondiente.
+3. `ProductosController` atiende la solicitud. `[Authorize]` exige iniciar sesión.
+4. El controlador llama a `IProductoRepository`; la implementación consulta EF Core.
 5. `ApplicationDbContext` ejecuta la consulta contra SQL Server.
 6. El controlador entrega los datos a una vista Razor, que genera el HTML de respuesta.
 
-Para crear un producto, el formulario de `Views/Productos/Create.cshtml` envia un
-POST. El controlador valida `ModelState`, agrega la entidad y guarda los cambios;
-si la validacion falla, devuelve el formulario para corregirlo.
+Para crear o editar un producto, `Views/Productos/Create.cshtml` y
+`Views/Productos/Edit.cshtml` reutilizan el formulario parcial
+`Views/Productos/_Form.cshtml`. El navegador envía un POST con los campos y, si se
+seleccionó una foto, con el archivo en formato multipart. El controlador valida los
+datos, la categoría y que el SKU no esté repetido. Si hay errores, vuelve a mostrar
+el formulario; si todo es válido, guarda los cambios y redirige al catálogo.
+
+## Categorías, campos y fotos de productos
+
+La sección **Categorías** permite crear, editar y eliminar categorías. Cada producto
+debe pertenecer a una categoría existente. La categoría **General** es la opción
+predeterminada y no se puede eliminar; tampoco se permite eliminar una categoría
+mientras tenga productos asociados.
+
+Los productos incluyen nombre, descripción, SKU único, marca, precio, existencias,
+estado activo/inactivo, fecha de alta y una foto opcional. El catálogo permite filtrar
+por categoría y buscar por nombre, SKU o marca. Desde el detalle se puede consultar
+la información y acceder a las acciones para editar o eliminar.
+
+Las imágenes admitidas son JPG, PNG y WebP, con un máximo de 2 MB. El servidor
+comprueba la extensión, el tipo declarado y la firma del contenido; guarda cada
+archivo con un nombre aleatorio en `wwwroot/uploads/productos`. Al reemplazar o
+eliminar un producto, también se elimina su foto anterior. La carpeta de cargas debe
+tener permisos de escritura para la identidad que ejecuta la aplicación. La vista
+previa del formulario se muestra localmente antes de enviar la imagen.
+
+Las solicitudes y formularios usan la cultura `es-MX`. El precio es un campo decimal
+numérico y sus límites de validación se interpretan con cultura invariable; esto evita
+errores al mostrar el formulario o validar el precio según la configuración regional.
+
+### Actualizar la base de datos
+
+La migración `AddCategoriesAndProductFields` agrega categorías y los campos nuevos
+del producto. Para aplicarla a una base que solo tenga la migración inicial, ejecuta:
+
+```powershell
+dotnet ef database update
+```
+
+La migración conserva los productos existentes: los asigna a **General**, les genera
+un SKU `LEGACY-<Id>`, los marca como activos y establece su stock inicial en cero.
+La fecha de alta se completa con la fecha UTC de la migración. Los cambios posteriores
+al modelo deben guardarse en una nueva migración; no se edita manualmente el snapshot
+de EF Core.
 
 ## Estilos con Tailwind CSS
 
@@ -59,11 +100,11 @@ npm run css:build   # compila app.css minificado para revisar o publicar
 `wwwroot/css/app.css` es un archivo generado y no se versiona. `dotnet publish`
 lo compila automaticamente mediante el target `TailwindPublish` del `.csproj`.
 
-## Configuracion y archivos generados
+## Configuración y archivos generados
 
 - `appsettings.json` contiene valores generales, incluida la cadena de conexion
   local. `appsettings.Development.json` puede sobrescribirlos durante desarrollo.
-- `Properties/launchSettings.json` configura los perfiles locales de ejecucion.
+- `Properties/launchSettings.json` configura los perfiles locales de ejecución.
 - Estos archivos usan formato JSON, por eso se explican aqui en vez de insertar
   comentarios que puedan invalidar la configuracion.
 - `wwwroot/css/app.css` lo genera Tailwind; no se edita a mano.

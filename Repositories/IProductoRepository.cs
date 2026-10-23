@@ -1,6 +1,4 @@
 using MiProyectoMvc.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace MiProyectoMvc.Repositories
 {
@@ -8,16 +6,22 @@ namespace MiProyectoMvc.Repositories
     // interfaz, no los detalles de Entity Framework ni de SQL Server.
     public interface IProductoRepository
     {
-        // Devuelve todos los productos de forma asincrona para no bloquear el servidor.
-        Task<IEnumerable<Producto>> GetAllAsync();
+        // Devuelve productos con su categoria, opcionalmente filtrados.
+        Task<IReadOnlyList<Producto>> GetAllAsync(int? categoriaId = null, string? buscar = null);
 
-        // Devuelve el producto solicitado o null si no existe.
+        // Devuelve el producto con su categoria o null si no existe.
         Task<Producto?> GetByIdAsync(int id);
 
-        // Prepara un producto nuevo para insertarlo; el guardado ocurre por separado.
-        Task AddAsync(Producto producto);
+        // Agrega y persiste el producto; devuelve el Id generado por la base.
+        Task<int> CreateAsync(Producto producto);
 
-        // Confirma en la base de datos los cambios pendientes del contexto.
-        Task SaveChangesAsync();
+        // Persiste los cambios de un producto existente.
+        Task UpdateAsync(Producto producto);
+
+        // Elimina el producto y lo devuelve (util para borrar su imagen); null si no existe.
+        Task<Producto?> DeleteAsync(int id);
+
+        // Comprueba la unicidad del SKU, excluyendo el producto que se esta editando.
+        Task<bool> SkuExistsAsync(string sku, int? excludeId = null);
     }
 }

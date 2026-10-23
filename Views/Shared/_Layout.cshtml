@@ -35,6 +35,7 @@
             <div class="hidden items-center gap-1 sm:flex">
                 <a class="@NavClass("Home", "Index")" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
                 <a class="@NavClass("Productos")" asp-area="" asp-controller="Productos" asp-action="Index">Productos</a>
+                <a class="@NavClass("Categorias")" asp-area="" asp-controller="Categorias" asp-action="Index">Categorías</a>
                 <a class="@NavClass("Home", "Privacy")" asp-area="" asp-controller="Home" asp-action="Privacy">Privacidad</a>
             </div>
 
@@ -59,6 +60,7 @@
             <div class="mx-auto flex w-full max-w-6xl flex-col gap-1 px-4 py-3">
                 <a class="@NavClass("Home", "Index")" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
                 <a class="@NavClass("Productos")" asp-area="" asp-controller="Productos" asp-action="Index">Productos</a>
+                <a class="@NavClass("Categorias")" asp-area="" asp-controller="Categorias" asp-action="Index">Categorías</a>
                 <a class="@NavClass("Home", "Privacy")" asp-area="" asp-controller="Home" asp-action="Privacy">Privacidad</a>
                 <div class="mt-2 border-t border-slate-200 pt-3">
                     <partial name="_LoginPartial" />
@@ -68,6 +70,8 @@
     </header>
 
     <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:py-10">
+        @* Mensajes de exito o error enviados por los controladores con TempData. *@
+        <partial name="_Alerts" />
         @* Razor inserta aqui el contenido de la vista solicitada. *@
         @RenderBody()
     </main>
