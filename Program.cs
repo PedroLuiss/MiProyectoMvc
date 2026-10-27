@@ -16,6 +16,8 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
+builder.Services.AddScoped<AIService>();
+
 // Registra el contexto de EF Core para que pueda inyectarse en otras clases.
 // UseSqlServer indica que la persistencia se realiza en SQL Server.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

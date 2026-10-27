@@ -8,6 +8,64 @@
 
 <partial name="_Form" model="Model" />
 
+<div class="mx-auto mt-4 max-w-5xl rounded-xl border border-brand-200 bg-brand-50 p-5">
+    <p class="font-semibold text-brand-900">Asistente de IA</p>
+    <p class="mt-1 text-sm text-brand-800">Genera una descripción y un precio sugerido a partir del nombre del producto.</p>
+    <button type="button" id="btnAutocompletar" data-ai-url="@Url.Action("AutocompletarConIA", "Productos")"
+            class="btn-secondary mt-3">
+        Autocompletar con IA
+    </button>
+    <p id="iaStatus" class="mt-2 text-sm text-slate-700" role="status" aria-live="polite"></p>
+</div>
+
+<script>
+    const aiButton = document.getElementById('btnAutocompletar');
+    const aiStatus = document.getElementById('iaStatus');
+
+    aiButton.addEventListener('click', async function () {
+        const nombreInput = document.getElementById('Nombre');
+        const descInput = document.getElementById('Descripcion');
+        const precioInput = document.getElementById('Precio');
+
+        if (!nombreInput || !nombreInput.value.trim()) {
+            aiStatus.textContent = 'Escribe primero el nombre del producto.';
+            return;
+        }
+
+        const originalText = this.textContent;
+        this.disabled = true;
+        this.textContent = 'Generando sugerencias...';
+        aiStatus.textContent = '';
+
+        try {
+            const response = await fetch(this.dataset.aiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: JSON.stringify({ nombre: nombreInput.value.trim() })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'No se pudieron generar sugerencias.');
+            }
+
+            descInput.value = data.descripcion;
+            precioInput.value = data.precio;
+            aiStatus.textContent = 'Descripción y precio sugeridos. Revísalos antes de guardar.';
+        } catch (error) {
+            aiStatus.textContent = error instanceof Error
+                ? error.message
+                : 'No se pudo completar la solicitud. Inténtalo de nuevo.';
+        } finally {
+            this.disabled = false;
+            this.textContent = originalText;
+        }
+    });
+</script>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/product-form.js" asp-append-version="true"></script>

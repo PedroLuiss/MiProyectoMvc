@@ -96,6 +96,22 @@ eliminar un producto, también se elimina su foto anterior. La carpeta de cargas
 tener permisos de escritura para la identidad que ejecuta la aplicación. La vista
 previa del formulario se muestra localmente antes de enviar la imagen.
 
+### Asistente de IA para productos
+
+En **Productos > Crear**, el botón **Autocompletar con IA** toma el nombre escrito
+en el formulario y solicita al proveedor una descripción comercial breve y un precio
+sugerido. Si la respuesta es válida, completa esos dos campos; el usuario debe
+revisarlos y puede modificarlos antes de guardar. La IA no crea el producto ni
+completa el SKU, la categoría, el stock u otros datos.
+
+El navegador envía el nombre como JSON al endpoint
+`POST /Productos/AutocompletarConIA`. El controlador valida la entrada y el token
+antifalsificación; `AIService` consulta el modelo configurado, interpreta la
+descripción y el precio y devuelve los datos al formulario. Si el proveedor rechaza
+la solicitud, la interfaz muestra el error en lugar de rellenar valores ficticios.
+Un error `403` indica que la clave o el proyecto no tienen permiso para ese modelo o
+servicio; revisa el acceso del proyecto en la plataforma del proveedor.
+
 Las solicitudes y formularios usan la cultura `es-MX`. El precio es un campo decimal
 numérico y sus límites de validación se interpretan con cultura invariable; esto evita
 errores al mostrar el formulario o validar el precio según la configuración regional.
@@ -148,6 +164,14 @@ lo compila automaticamente mediante el target `TailwindPublish` del `.csproj`.
 
 - `appsettings.json` contiene valores generales, incluida la cadena de conexion
   local. `appsettings.Development.json` puede sobrescribirlos durante desarrollo.
+- La clave del proveedor de IA no se guarda en archivos del proyecto. En desarrollo,
+  inicializa User Secrets una vez con `dotnet user-secrets init` y guarda la clave con
+  `dotnet user-secrets set "AISettings:ApiKey" "<tu-clave>"`. En producción, usa la
+  variable de entorno `AISettings__ApiKey`. El modelo se configura con
+  `dotnet user-secrets set "AISettings:ModelName" "gpt-4o-mini"` o con la variable
+  `AISettings__ModelName`; por defecto el servicio usa `gpt-4o-mini`. La clave y el
+  proyecto asociados deben tener acceso al modelo y a la API del proveedor. Reinicia
+  la aplicación después de cambiar los secretos o las variables de entorno.
 - `Properties/launchSettings.json` configura los perfiles locales de ejecución.
 - Estos archivos usan formato JSON, por eso se explican aqui en vez de insertar
   comentarios que puedan invalidar la configuracion.

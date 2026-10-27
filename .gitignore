@@ -9,6 +9,10 @@
 # Tailwind CSS (generado por npm run css:build / css:dev)
 wwwroot/css/app.css
 
+# Fotos subidas por los usuarios
+wwwroot/uploads/*
+!wwwroot/uploads/.gitkeep
+
 # User-specific files
 *.rsuser
 *.suo

@@ -1,29 +1,30 @@
-using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
-using MiProyectoMvc.Models;
+using System.Diagnostics; // Permite consultar la actividad diagnostica y su identificador de seguimiento.
+using Microsoft.AspNetCore.Mvc; // Proporciona las clases y resultados usados por las acciones MVC.
+using MiProyectoMvc.Models; // Incluye el modelo que transporta los datos de la pagina de error.
 
-namespace MiProyectoMvc.Controllers;
+namespace MiProyectoMvc.Controllers; // Agrupa los controladores web de la aplicacion.
 
-// Acciones para las paginas generales que no pertenecen al catalogo de productos.
-public class HomeController : Controller
+// Atiende paginas generales que no pertenecen al catalogo de productos.
+public class HomeController : Controller // Hereda las utilidades para devolver vistas y respuestas HTTP.
 {
-    // La convencion de MVC busca Views/Home/Index.cshtml.
+    // GET /: la convencion de MVC busca Views/Home/Index.cshtml para esta accion.
     public IActionResult Index()
     {
-        return View();
+        return View(); // Renderiza la pagina principal sin un modelo adicional.
     }
 
-    // Muestra la pagina informativa de privacidad.
+    // GET /Home/Privacy: muestra la pagina informativa de privacidad.
     public IActionResult Privacy()
     {
-        return View();
+        return View(); // Renderiza la vista Privacy correspondiente al controlador.
     }
 
-    // Evita guardar en cache la pagina de error, para que cada solicitud muestre su propio ID.
+    // Desactiva la cache para que el identificador de seguimiento corresponda a la solicitud actual.
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    // GET /Home/Error: presenta una pagina de error con un identificador de seguimiento.
     public IActionResult Error()
     {
-        // Se prefiere el ID de la actividad diagnostica; si no existe, se usa el ID HTTP.
+        // Usa el ID de la actividad diagnostica o, si no existe, el identificador de la solicitud HTTP.
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
