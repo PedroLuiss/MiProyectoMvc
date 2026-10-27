@@ -1,0 +1,71 @@
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Crear cuenta";
+}
+
+<section class="mx-auto max-w-md">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div class="text-center">
+            <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-600 text-lg font-black text-white shadow-sm">M</span>
+            <h1 class="mt-5 text-2xl font-bold tracking-tight text-slate-900">Crea tu cuenta</h1>
+            <p class="mt-2 text-sm text-slate-500">Regístrate para administrar el catálogo.</p>
+        </div>
+
+        <form method="post" asp-route-returnUrl="@Model.ReturnUrl" class="mt-7 space-y-5">
+            <div asp-validation-summary="ModelOnly" class="text-sm text-red-600" role="alert"></div>
+
+            <div>
+                <label asp-for="Input.Email" class="mb-1.5 block text-sm font-medium text-slate-700">Correo electrónico</label>
+                <input asp-for="Input.Email" autocomplete="username" aria-required="true"
+                       class="input-field" placeholder="nombre@ejemplo.com" />
+                <span asp-validation-for="Input.Email"></span>
+            </div>
+
+            <div>
+                <label asp-for="Input.Password" class="mb-1.5 block text-sm font-medium text-slate-700">Contraseña</label>
+                <input asp-for="Input.Password" autocomplete="new-password" aria-required="true"
+                       class="input-field" placeholder="Crea una contraseña" />
+                <span asp-validation-for="Input.Password"></span>
+            </div>
+
+            <div>
+                <label asp-for="Input.ConfirmPassword" class="mb-1.5 block text-sm font-medium text-slate-700">Confirmar contraseña</label>
+                <input asp-for="Input.ConfirmPassword" autocomplete="new-password" aria-required="true"
+                       class="input-field" placeholder="Escribe de nuevo tu contraseña" />
+                <span asp-validation-for="Input.ConfirmPassword"></span>
+            </div>
+
+            <button type="submit" class="btn-primary w-full">Crear cuenta</button>
+        </form>
+
+        @if (Model.ExternalLogins is { Count: > 0 } externalLogins)
+        {
+            <div class="my-6 flex items-center gap-3">
+                <span class="h-px flex-1 bg-slate-200"></span>
+                <span class="text-xs font-medium uppercase tracking-wide text-slate-400">O regístrate con</span>
+                <span class="h-px flex-1 bg-slate-200"></span>
+            </div>
+
+            <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="flex flex-wrap gap-2">
+                @foreach (var provider in externalLogins)
+                {
+                    <button type="submit" name="provider" value="@provider.Name"
+                            class="btn-secondary flex-1">
+                        @provider.DisplayName
+                    </button>
+                }
+            </form>
+        }
+
+        <p class="mt-6 text-center text-sm text-slate-600">
+            ¿Ya tienes cuenta?
+            <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl"
+               class="font-semibold text-brand-600 hover:text-brand-700">Iniciar sesión</a>
+        </p>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -129,8 +129,9 @@ de `wwwroot/css/input.css`.
 - Las clases se escriben completas en el HTML. Tailwind no detecta nombres
   construidos dinamicamente como `"text-" + color`; en ese caso usa un `switch`
   que devuelva la clase entera.
-- Bootstrap se retiro de las vistas propias. Las paginas de Identity conservan el
-  Bootstrap que trae su paquete para no mezclar dos sistemas en el mismo layout.
+- Bootstrap se retiro de las vistas propias. Las paginas de acceso y registro de
+  Identity usan el layout del sitio y utilidades Tailwind; las otras paginas Identity
+  mantienen el layout predeterminado incluido en su paquete.
 
 Comandos disponibles:
 

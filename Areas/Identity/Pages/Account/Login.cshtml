@@ -1,0 +1,82 @@
+@page
+@model LoginModel
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<section class="mx-auto max-w-md">
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div class="text-center">
+            <span class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-600 text-lg font-black text-white shadow-sm">M</span>
+            <h1 class="mt-5 text-2xl font-bold tracking-tight text-slate-900">Bienvenido de nuevo</h1>
+            <p class="mt-2 text-sm text-slate-500">Inicia sesión para continuar con tu cuenta.</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+                @Model.ErrorMessage
+            </div>
+        }
+
+        <form method="post" asp-route-returnUrl="@Model.ReturnUrl" class="mt-7 space-y-5">
+            <div asp-validation-summary="ModelOnly" class="text-sm text-red-600" role="alert"></div>
+
+            <div>
+                <label asp-for="Input.Email" class="mb-1.5 block text-sm font-medium text-slate-700">Correo electrónico</label>
+                <input asp-for="Input.Email" autocomplete="username" aria-required="true"
+                       class="input-field" placeholder="nombre@ejemplo.com" />
+                <span asp-validation-for="Input.Email"></span>
+            </div>
+
+            <div>
+                <div class="mb-1.5 flex items-center justify-between gap-3">
+                    <label asp-for="Input.Password" class="block text-sm font-medium text-slate-700">Contraseña</label>
+                    <a asp-page="./ForgotPassword" class="text-sm font-medium text-brand-600 hover:text-brand-700">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
+                <input asp-for="Input.Password" autocomplete="current-password" aria-required="true"
+                       class="input-field" placeholder="Tu contraseña" />
+                <span asp-validation-for="Input.Password"></span>
+            </div>
+
+            <label asp-for="Input.RememberMe" class="flex items-center gap-2.5 text-sm text-slate-600">
+                <input asp-for="Input.RememberMe"
+                       class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
+                <span>Recordarme</span>
+            </label>
+
+            <button type="submit" class="btn-primary w-full">Iniciar sesión</button>
+        </form>
+
+        @if (Model.ExternalLogins is { Count: > 0 } externalLogins)
+        {
+            <div class="my-6 flex items-center gap-3">
+                <span class="h-px flex-1 bg-slate-200"></span>
+                <span class="text-xs font-medium uppercase tracking-wide text-slate-400">O continúa con</span>
+                <span class="h-px flex-1 bg-slate-200"></span>
+            </div>
+
+            <form asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="flex flex-wrap gap-2">
+                @foreach (var provider in externalLogins)
+                {
+                    <button type="submit" name="provider" value="@provider.Name"
+                            class="btn-secondary flex-1">
+                        @provider.DisplayName
+                    </button>
+                }
+            </form>
+        }
+
+        <p class="mt-6 text-center text-sm text-slate-600">
+            ¿Aún no tienes cuenta?
+            <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl"
+               class="font-semibold text-brand-600 hover:text-brand-700">Crear cuenta</a>
+        </p>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -9,6 +9,7 @@
 @import "tailwindcss" source(none);
 
 @source "../../Views";
+@source "../../Areas";
 @source "../../wwwroot/js";
 
 /*
