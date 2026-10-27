@@ -47,14 +47,12 @@ namespace MiProyectoMvc.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<int> CreateAsync(Producto producto)
+        public Task AddAsync(Producto producto)
         {
-            _context.Productos.Add(producto);
-            await _context.SaveChangesAsync();
-            return producto.Id;
+            return _context.Productos.AddAsync(producto).AsTask();
         }
 
-        public async Task UpdateAsync(Producto producto)
+        public Task UpdateAsync(Producto producto)
         {
             // Edit trabaja con una entidad ya rastreada; solo se guarda si viene suelta.
             if (_context.Entry(producto).State == EntityState.Detached)
@@ -63,7 +61,7 @@ namespace MiProyectoMvc.Repositories
                 _context.Entry(producto).State = EntityState.Modified;
             }
 
-            await _context.SaveChangesAsync();
+            return Task.CompletedTask;
         }
 
         public async Task<Producto?> DeleteAsync(int id)
@@ -75,7 +73,6 @@ namespace MiProyectoMvc.Repositories
             }
 
             _context.Productos.Remove(producto);
-            await _context.SaveChangesAsync();
             return producto;
         }
 

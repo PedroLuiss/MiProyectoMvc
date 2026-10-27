@@ -40,14 +40,12 @@ namespace MiProyectoMvc.Repositories
             return await _context.Categorias.FindAsync(id);
         }
 
-        public async Task<int> CreateAsync(Categoria categoria)
+        public Task AddAsync(Categoria categoria)
         {
-            _context.Categorias.Add(categoria);
-            await _context.SaveChangesAsync();
-            return categoria.Id;
+            return _context.Categorias.AddAsync(categoria).AsTask();
         }
 
-        public async Task UpdateAsync(Categoria categoria)
+        public Task UpdateAsync(Categoria categoria)
         {
             if (_context.Entry(categoria).State == EntityState.Detached)
             {
@@ -55,7 +53,7 @@ namespace MiProyectoMvc.Repositories
                 _context.Entry(categoria).State = EntityState.Modified;
             }
 
-            await _context.SaveChangesAsync();
+            return Task.CompletedTask;
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -67,25 +65,7 @@ namespace MiProyectoMvc.Repositories
             }
 
             _context.Categorias.Remove(categoria);
-
-            try
-            {
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (DbUpdateException)
-            {
-                _context.Entry(categoria).State = EntityState.Detached;
-
-                // La FK puede rechazar el borrado si un producto se asocio a la
-                // categoria justo despues de la comprobacion del controlador.
-                if (await _context.Productos.AnyAsync(p => p.CategoriaId == id))
-                {
-                    return false;
-                }
-
-                throw;
-            }
+            return true;
         }
 
         public Task<int> CountProductosAsync(int categoriaId)

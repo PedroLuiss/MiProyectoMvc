@@ -12,13 +12,14 @@ namespace MiProyectoMvc.Repositories
         // Devuelve el producto con su categoria o null si no existe.
         Task<Producto?> GetByIdAsync(int id);
 
-        // Agrega y persiste el producto; devuelve el Id generado por la base.
-        Task<int> CreateAsync(Producto producto);
+        // Prepara un producto nuevo; IUnitOfWork.SaveAsync confirma el cambio.
+        Task AddAsync(Producto producto);
 
-        // Persiste los cambios de un producto existente.
+        // Prepara los cambios de un producto existente.
         Task UpdateAsync(Producto producto);
 
-        // Elimina el producto y lo devuelve (util para borrar su imagen); null si no existe.
+        // Marca el producto para eliminar y lo devuelve (util para borrar su imagen);
+        // null si no existe. La eliminacion se confirma con IUnitOfWork.SaveAsync.
         Task<Producto?> DeleteAsync(int id);
 
         // Comprueba la unicidad del SKU, excluyendo el producto que se esta editando.

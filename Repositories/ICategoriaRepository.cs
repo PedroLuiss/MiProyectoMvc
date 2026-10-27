@@ -12,10 +12,13 @@ namespace MiProyectoMvc.Repositories
 
         Task<Categoria?> GetByIdAsync(int id);
 
-        Task<int> CreateAsync(Categoria categoria);
+        // Prepara una categoria nueva; IUnitOfWork.SaveAsync confirma el cambio.
+        Task AddAsync(Categoria categoria);
 
+        // Prepara los cambios de una categoria existente.
         Task UpdateAsync(Categoria categoria);
 
+        // Marca la categoria para eliminar; false si no existe.
         Task<bool> DeleteAsync(int id);
 
         Task<int> CountProductosAsync(int categoriaId);

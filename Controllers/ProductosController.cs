@@ -13,41 +13,27 @@ namespace MiProyectoMvc.Controllers
     [Authorize]
     public class ProductosController : Controller
     {
-        private readonly IProductoRepository _productoRepository;
-        private readonly ICategoriaRepository _categoriaRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IImagenStorage _imagenStorage;
 
         public ProductosController(
-            IProductoRepository productoRepository,
-            ICategoriaRepository categoriaRepository,
+            IUnitOfWork unitOfWork,
             IImagenStorage imagenStorage)
         {
-            _productoRepository = productoRepository;
-            _categoriaRepository = categoriaRepository;
+            _unitOfWork = unitOfWork;
             _imagenStorage = imagenStorage;
         }
 
         // GET /Productos: catalogo con filtros opcionales por categoria y texto.
         public async Task<IActionResult> Index(int? categoriaId, string? buscar)
         {
-            var productos = await _productoRepository.GetAllAsync(categoriaId, buscar);
-            var categorias = await _categoriaRepository.GetAllAsync();
-
-            var model = new ProductoIndexViewModel
-            {
-                Productos = productos.Select(p => p.ToResumenViewModel()).ToList(),
-                Categorias = categorias,
-                CategoriaId = categoriaId is > 0 ? categoriaId : null,
-                Buscar = string.IsNullOrWhiteSpace(buscar) ? null : buscar.Trim()
-            };
-
-            return View(model);
+            return View(await CrearModeloIndiceAsync(categoriaId, buscar));
         }
 
         // GET /Productos/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            var producto = await _productoRepository.GetByIdAsync(id);
+            var producto = await _unitOfWork.Productos.GetByIdAsync(id);
             return producto is null ? NotFound() : View(producto.ToDetailsViewModel());
         }
 
@@ -92,13 +78,14 @@ namespace MiProyectoMvc.Controllers
 
             try
             {
-                await _productoRepository.CreateAsync(producto);
+                await _unitOfWork.Productos.AddAsync(producto);
+                await _unitOfWork.SaveAsync();
             }
             catch (DbUpdateException)
             {
                 // Si la base rechaza el alta, no dejamos la foto huerfana en disco.
                 await _imagenStorage.DeleteAsync(producto.ImagenUrl);
-                if (await _productoRepository.SkuExistsAsync(model.Sku))
+                if (await _unitOfWork.Productos.SkuExistsAsync(model.Sku))
                 {
                     ModelState.AddModelError(nameof(model.Sku), "Ya existe un producto con ese SKU.");
                     await CargarCategoriasAsync(model);
@@ -115,7 +102,7 @@ namespace MiProyectoMvc.Controllers
         // GET /Productos/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            var producto = await _productoRepository.GetByIdAsync(id);
+            var producto = await _unitOfWork.Productos.GetByIdAsync(id);
             if (producto is null)
             {
                 return NotFound();
@@ -136,7 +123,7 @@ namespace MiProyectoMvc.Controllers
                 return BadRequest();
             }
 
-            var producto = await _productoRepository.GetByIdAsync(id);
+            var producto = await _unitOfWork.Productos.GetByIdAsync(id);
             if (producto is null)
             {
                 return NotFound();
@@ -176,12 +163,13 @@ namespace MiProyectoMvc.Controllers
 
             try
             {
-                await _productoRepository.UpdateAsync(producto);
+                await _unitOfWork.Productos.UpdateAsync(producto);
+                await _unitOfWork.SaveAsync();
             }
             catch (DbUpdateException)
             {
                 await _imagenStorage.DeleteAsync(imagenNueva);
-                if (await _productoRepository.SkuExistsAsync(model.Sku, id))
+                if (await _unitOfWork.Productos.SkuExistsAsync(model.Sku, id))
                 {
                     ModelState.AddModelError(nameof(model.Sku), "Ya existe un producto con ese SKU.");
                     await CargarCategoriasAsync(model);
@@ -204,7 +192,7 @@ namespace MiProyectoMvc.Controllers
         // GET /Productos/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
-            var producto = await _productoRepository.GetByIdAsync(id);
+            var producto = await _unitOfWork.Productos.GetByIdAsync(id);
             return producto is null ? NotFound() : View(producto.ToDetailsViewModel());
         }
 
@@ -212,24 +200,76 @@ namespace MiProyectoMvc.Controllers
         [HttpPost]
         [ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, int? categoriaId, string? buscar)
         {
-            var producto = await _productoRepository.DeleteAsync(id);
+            var producto = await _unitOfWork.Productos.DeleteAsync(id);
             if (producto is null)
             {
                 return NotFound();
             }
 
+            await _unitOfWork.SaveAsync();
             await _imagenStorage.DeleteAsync(producto.ImagenUrl);
 
+            if (EsSolicitudAjax())
+            {
+                var modelo = await CrearModeloIndiceAsync(categoriaId, buscar);
+                return PartialView("_ProductoResults", modelo);
+            }
+
             TempData["Ok"] = "Producto eliminado correctamente.";
+            return RedirectToAction(nameof(Index), new { categoriaId, buscar });
+        }
+
+        // POST /Productos/UpdateStock/5: actualiza el stock y devuelve su fragmento Razor.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateStock(int id, ProductoStockViewModel model)
+        {
+            var producto = await _unitOfWork.Productos.GetByIdAsync(id);
+            if (producto is null)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.Id = id;
+                model.Nombre = producto.Nombre;
+                model.Error = ModelState[nameof(model.Stock)]?.Errors
+                    .FirstOrDefault()?.ErrorMessage ?? "Introduce un valor de stock válido.";
+
+                if (!EsSolicitudAjax())
+                {
+                    TempData["Error"] = model.Error;
+                    return RedirectToAction(nameof(Index));
+                }
+
+                Response.StatusCode = StatusCodes.Status400BadRequest;
+                return PartialView("_ProductoStock", model);
+            }
+
+            producto.Stock = model.Stock;
+            await _unitOfWork.Productos.UpdateAsync(producto);
+            await _unitOfWork.SaveAsync();
+
+            model.Id = id;
+            model.Nombre = producto.Nombre;
+            model.Error = null;
+
+            if (EsSolicitudAjax())
+            {
+                return PartialView("_ProductoStock", model);
+            }
+
+            TempData["Ok"] = "Stock actualizado correctamente.";
             return RedirectToAction(nameof(Index));
         }
 
         private async Task ValidarSkuAsync(ProductoFormViewModel model, int? excludeId)
         {
             if (!string.IsNullOrWhiteSpace(model.Sku) &&
-                await _productoRepository.SkuExistsAsync(model.Sku, excludeId))
+                await _unitOfWork.Productos.SkuExistsAsync(model.Sku, excludeId))
             {
                 ModelState.AddModelError(nameof(model.Sku), "Ya existe un producto con ese SKU.");
             }
@@ -237,16 +277,38 @@ namespace MiProyectoMvc.Controllers
 
         private async Task CargarCategoriasAsync(ProductoFormViewModel model)
         {
-            var categorias = await _categoriaRepository.GetAllAsync();
+            var categorias = await _unitOfWork.Categorias.GetAllAsync();
             model.Categorias = categorias
                 .Select(c => new SelectListItem(c.Nombre, c.Id.ToString()))
                 .ToList();
         }
 
+        private async Task<ProductoIndexViewModel> CrearModeloIndiceAsync(int? categoriaId, string? buscar)
+        {
+            var productos = await _unitOfWork.Productos.GetAllAsync(categoriaId, buscar);
+            var categorias = await _unitOfWork.Categorias.GetAllAsync();
+
+            return new ProductoIndexViewModel
+            {
+                Productos = productos.Select(p => p.ToResumenViewModel()).ToList(),
+                Categorias = categorias,
+                CategoriaId = categoriaId is > 0 ? categoriaId : null,
+                Buscar = string.IsNullOrWhiteSpace(buscar) ? null : buscar.Trim()
+            };
+        }
+
+        private bool EsSolicitudAjax()
+        {
+            return string.Equals(
+                Request.Headers["X-Requested-With"],
+                "XMLHttpRequest",
+                StringComparison.OrdinalIgnoreCase);
+        }
+
         private async Task ValidarCategoriaAsync(ProductoFormViewModel model)
         {
             if (model.CategoriaId > 0 &&
-                await _categoriaRepository.GetByIdAsync(model.CategoriaId) is null)
+                await _unitOfWork.Categorias.GetByIdAsync(model.CategoriaId) is null)
             {
                 ModelState.AddModelError(nameof(model.CategoriaId), "La categoría seleccionada no existe.");
             }

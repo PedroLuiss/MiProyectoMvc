@@ -1,0 +1,20 @@
+@model ProductoStockViewModel
+
+<section id="producto-stock-@Model.Id" data-product-stock="@Model.Id" class="mt-2">
+    <form asp-action="UpdateStock" asp-route-id="@Model.Id" method="post" data-ajax-stock
+          class="flex items-end gap-2">
+        @Html.AntiForgeryToken()
+        <div class="min-w-0 flex-1">
+            <label for="stock-@Model.Id" class="text-xs text-slate-500">Stock</label>
+            <input id="stock-@Model.Id" name="Stock" type="number" min="0" max="100000"
+                   value="@Model.Stock" required
+                   class="input-field mt-1 py-2" aria-label="Stock de @Model.Nombre" />
+        </div>
+        <button type="submit" class="btn-secondary">Actualizar</button>
+    </form>
+
+    @if (!string.IsNullOrWhiteSpace(Model.Error))
+    {
+        <p class="mt-2 text-sm text-red-600" role="alert">@Model.Error</p>
+    }
+</section>

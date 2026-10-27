@@ -11,7 +11,9 @@ Core, SQL Server, ASP.NET Core Identity y Tailwind CSS. El proyecto apunta a **.
 - `Data/ApplicationDbContext.cs`: conecta las entidades de la aplicacion con EF Core
   y contiene tambien el esquema de Identity.
 - `Repositories`: separa las operaciones de lectura/escritura de la base de datos
-  del controlador.
+  del controlador. Los repositorios preparan cambios, pero no los guardan por separado.
+- `Repositories/IUnitOfWork.cs` y `UnitOfWork.cs`: coordinan los repositorios de
+  productos y categorías y confirman sus cambios juntos con `SaveAsync()`.
 - `Views`: plantillas Razor que mezclan HTML con expresiones C# para presentar datos.
 - `Migrations`: instrucciones versionadas que crean o modifican las tablas.
 - `wwwroot`: archivos publicos del navegador, como CSS, JavaScript e imagenes.
@@ -23,9 +25,33 @@ Core, SQL Server, ASP.NET Core Identity y Tailwind CSS. El proyecto apunta a **.
 1. El navegador solicita una URL, por ejemplo `/Productos`.
 2. El enrutamiento configurado en `Program.cs` busca la acción correspondiente.
 3. `ProductosController` atiende la solicitud. `[Authorize]` exige iniciar sesión.
-4. El controlador llama a `IProductoRepository`; la implementación consulta EF Core.
-5. `ApplicationDbContext` ejecuta la consulta contra SQL Server.
-6. El controlador entrega los datos a una vista Razor, que genera el HTML de respuesta.
+4. El controlador obtiene los repositorios desde `IUnitOfWork`; estos consultan EF
+   Core o preparan cambios en el contexto compartido.
+5. Al terminar la operación, el controlador llama a `SaveAsync()` una sola vez para
+   confirmar los cambios pendientes.
+6. `ApplicationDbContext` ejecuta la operación contra SQL Server y el controlador
+   entrega los datos a una vista Razor, que genera el HTML de respuesta.
+
+### Unidad de trabajo y repositorios
+
+`IUnitOfWork` expone `Productos` (`IProductoRepository`) y `Categorias`
+(`ICategoriaRepository`), además del método general `SaveAsync()`. Ambas
+implementaciones usan la misma instancia de `ApplicationDbContext` durante la
+solicitud HTTP. Por eso se pueden preparar cambios con más de un repositorio y
+confirmarlos en conjunto:
+
+```csharp
+await unitOfWork.Productos.AddAsync(producto);
+await unitOfWork.Categorias.UpdateAsync(categoria);
+await unitOfWork.SaveAsync();
+```
+
+`SaveAsync()` delega a `ApplicationDbContext.SaveChangesAsync()`, que confirma los
+cambios rastreados por EF Core en una única operación. Los métodos de escritura de
+los repositorios no llaman directamente a `SaveChangesAsync()`. Para incorporar otro
+repositorio, se agrega su interfaz como propiedad de `IUnitOfWork`, se inyecta su
+implementación en `UnitOfWork` y se registra en `Program.cs` con ciclo de vida
+`Scoped`, igual que el contexto.
 
 Para crear o editar un producto, `Views/Productos/Create.cshtml` y
 `Views/Productos/Edit.cshtml` reutilizan el formulario parcial
@@ -33,6 +59,23 @@ Para crear o editar un producto, `Views/Productos/Create.cshtml` y
 seleccionó una foto, con el archivo en formato multipart. El controlador valida los
 datos, la categoría y que el SKU no esté repetido. Si hay errores, vuelve a mostrar
 el formulario; si todo es válido, guarda los cambios y redirige al catálogo.
+
+### Acciones AJAX y vistas parciales
+
+En el catálogo, `wwwroot/js/product-actions.js` intercepta la eliminación de
+productos y la actualización del stock y las envía con `fetch`. Las solicitudes
+incluyen el token antifalsificación y el encabezado `X-Requested-With`.
+`ProductosController` detecta esas solicitudes y devuelve HTML renderizado por
+parciales Razor:
+
+- `_ProductoResults.cshtml` vuelve a dibujar el contador y la lista después de
+  eliminar un producto, incluidos los resultados vacíos y los filtros activos.
+- `_ProductoStock.cshtml` reemplaza el control del stock después de guardarlo y
+  muestra errores de validación sin recargar la página.
+
+Las mismas acciones conservan el envío de formularios tradicional como alternativa
+si JavaScript está deshabilitado. Los formularios de escritura usan
+`@Html.AntiForgeryToken()` también cuando se envían por AJAX.
 
 ## Categorías, campos y fotos de productos
 

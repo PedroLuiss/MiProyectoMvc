@@ -14,16 +14,16 @@ namespace MiProyectoMvc.Controllers
     {
         private const int CategoriaGeneralId = 1;
 
-        private readonly ICategoriaRepository _categoriaRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CategoriasController(ICategoriaRepository categoriaRepository)
+        public CategoriasController(IUnitOfWork unitOfWork)
         {
-            _categoriaRepository = categoriaRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<IActionResult> Index()
         {
-            var categorias = await _categoriaRepository.GetAllResumenAsync();
+            var categorias = await _unitOfWork.Categorias.GetAllResumenAsync();
             return View(new CategoriaIndexViewModel { Categorias = categorias });
         }
 
@@ -37,7 +37,7 @@ namespace MiProyectoMvc.Controllers
         public async Task<IActionResult> Create(CategoriaFormViewModel model)
         {
             if (!string.IsNullOrWhiteSpace(model.Nombre) &&
-                await _categoriaRepository.NombreExistsAsync(model.Nombre))
+                await _unitOfWork.Categorias.NombreExistsAsync(model.Nombre))
             {
                 ModelState.AddModelError(nameof(model.Nombre), "Ya existe una categoría con ese nombre.");
             }
@@ -49,11 +49,12 @@ namespace MiProyectoMvc.Controllers
 
             try
             {
-                await _categoriaRepository.CreateAsync(model.ToEntity());
+                await _unitOfWork.Categorias.AddAsync(model.ToEntity());
+                await _unitOfWork.SaveAsync();
             }
             catch (DbUpdateException)
             {
-                if (await _categoriaRepository.NombreExistsAsync(model.Nombre))
+                if (await _unitOfWork.Categorias.NombreExistsAsync(model.Nombre))
                 {
                     ModelState.AddModelError(nameof(model.Nombre), "Ya existe una categoría con ese nombre.");
                     return View(model);
@@ -68,7 +69,7 @@ namespace MiProyectoMvc.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var categoria = await _categoriaRepository.GetByIdAsync(id);
+            var categoria = await _unitOfWork.Categorias.GetByIdAsync(id);
             return categoria is null ? NotFound() : View(categoria.ToFormViewModel());
         }
 
@@ -81,14 +82,14 @@ namespace MiProyectoMvc.Controllers
                 return BadRequest();
             }
 
-            var categoria = await _categoriaRepository.GetByIdAsync(id);
+            var categoria = await _unitOfWork.Categorias.GetByIdAsync(id);
             if (categoria is null)
             {
                 return NotFound();
             }
 
             if (!string.IsNullOrWhiteSpace(model.Nombre) &&
-                await _categoriaRepository.NombreExistsAsync(model.Nombre, id))
+                await _unitOfWork.Categorias.NombreExistsAsync(model.Nombre, id))
             {
                 ModelState.AddModelError(nameof(model.Nombre), "Ya existe una categoría con ese nombre.");
             }
@@ -102,11 +103,12 @@ namespace MiProyectoMvc.Controllers
 
             try
             {
-                await _categoriaRepository.UpdateAsync(categoria);
+                await _unitOfWork.Categorias.UpdateAsync(categoria);
+                await _unitOfWork.SaveAsync();
             }
             catch (DbUpdateException)
             {
-                if (await _categoriaRepository.NombreExistsAsync(model.Nombre, id))
+                if (await _unitOfWork.Categorias.NombreExistsAsync(model.Nombre, id))
                 {
                     ModelState.AddModelError(nameof(model.Nombre), "Ya existe una categoría con ese nombre.");
                     return View(model);
@@ -121,13 +123,13 @@ namespace MiProyectoMvc.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var categoria = await _categoriaRepository.GetByIdAsync(id);
+            var categoria = await _unitOfWork.Categorias.GetByIdAsync(id);
             if (categoria is null)
             {
                 return NotFound();
             }
 
-            var count = await _categoriaRepository.CountProductosAsync(id);
+            var count = await _unitOfWork.Categorias.CountProductosAsync(id);
 
             return View(new CategoriaDeleteViewModel
             {
@@ -149,21 +151,35 @@ namespace MiProyectoMvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var count = await _categoriaRepository.CountProductosAsync(id);
+            var count = await _unitOfWork.Categorias.CountProductosAsync(id);
             if (count > 0)
             {
                 TempData["Error"] = $"No se puede eliminar la categoría: tiene {count} producto(s) asociado(s).";
                 return RedirectToAction(nameof(Index));
             }
 
-            var eliminada = await _categoriaRepository.DeleteAsync(id);
-            if (eliminada)
+            var marcadaParaEliminar = await _unitOfWork.Categorias.DeleteAsync(id);
+            if (!marcadaParaEliminar)
             {
+                TempData["Error"] = "No se pudo encontrar la categoría.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            try
+            {
+                await _unitOfWork.SaveAsync();
                 TempData["Ok"] = "Categoría eliminada correctamente.";
             }
-            else
+            catch (DbUpdateException)
             {
-                TempData["Error"] = "No se pudo eliminar la categoría.";
+                if (await _unitOfWork.Categorias.CountProductosAsync(id) > 0)
+                {
+                    TempData["Error"] = "No se puede eliminar la categoría porque tiene productos asociados.";
+                }
+                else
+                {
+                    throw;
+                }
             }
 
             return RedirectToAction(nameof(Index));

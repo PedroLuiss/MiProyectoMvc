@@ -30,6 +30,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 // Scoped crea una instancia por solicitud HTTP, compartida durante esa solicitud.
 builder.Services.AddScoped<IProductoRepository, ProductoRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // El almacenamiento de fotos tambien se resuelve por interfaz.
 builder.Services.AddScoped<IImagenStorage, ImagenStorage>();
